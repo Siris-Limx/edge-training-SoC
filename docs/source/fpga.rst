@@ -16,6 +16,37 @@ FPGA 仿真
 这个脚本首先会遍历 ``<cva6>/corev_apu/fpga/xilinx`` 目录中所有的 IP 文件夹，生成 IP 并综合。
 然后运行 ``<cva6>/corev_apu/fpga/scripts`` 目录中的 ``prologue.tcl`` 和 ``run.tcl`` 综合源文件，最后布局布线生成 bitstream。
 
+安装 Vivado
+^^^^^^^^^^^^
+
+Windows
+#############
+
+1. 下载解压Vivado软件压缩包，直接点击xsetup.exe，进入安装，`安装路径不要有中文，和空格` ！
+
+2. 安装License文件。
+
+Linux
+#############
+
+0. 安装依赖 ``sudo apt-get install libtinfo5 libncurses5-dev``。
+
+1. 解压Vivado软件压缩包，进入解压目录，并在该目录下进入终端。
+
+2. 运行 ``sudo  chmod  +x  xsetup && sudo ./xsetup``，进入安装，默认安装路径为 ``/opt/Xilinx/``，建议不要修改。
+
+3. 安装License文件。
+
+4. 权限设置 ``sudo  chmod  777  -R  /opt/Xilinx/ && sudo  chmod  777  -R  ~/.Xilinx/``。
+
+5. 安装下载器驱动 ``sudo /opt/Xilinx/Vivado/<vivado_version>/data/xicom/cable_drivers/lin64/install_script/install_drivers/`` 。
+看到终端输出 ``INFO: Driver installation successful`` 说明安装成功。
+
+6. 安装完成后，运行 ``source /opt/Xilinx/Vivado/<vivado_version>/settings64.sh``，设置环境变量，建议将这条命令放在 ``~/.bashrc`` 中。
+
+7. 在任意位置的终端中输入 ``vivado`` 即可运行 vivado GUI，注意，vivado 会在启动 vivado GUI 的目录下生成一些 log 文件，建议在特定的文件夹下启动 vivado。
+
+
 脚本修改
 ^^^^^^^^^^^^^^^^^^^
 
