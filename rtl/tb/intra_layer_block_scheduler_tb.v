@@ -1,4 +1,4 @@
-module scheduler_tb;
+module intra_layer_block_scheduler_tb;
 
     reg block_finish_valid, clk, rst_n;
 
@@ -12,7 +12,7 @@ module scheduler_tb;
 
     initial
     begin
-        $dumpfile("build/scheduler_tb.vcd");
+        $dumpfile("build/intra_layer_block_scheduler_tb.vcd");
         $dumpvars(0, scheduler_tb);
     end
 

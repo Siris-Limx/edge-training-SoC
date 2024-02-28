@@ -28,6 +28,7 @@ module intra_layer_block_scheduler
 
     reg [1:0] state_d, state_q;
 
+    // schedule output
     always @(*)
     begin
         case (state_q)
@@ -69,6 +70,7 @@ module intra_layer_block_scheduler
         endcase
     end
 
+    // state transition
     always @(*)
     begin
         state_d = state_q;
