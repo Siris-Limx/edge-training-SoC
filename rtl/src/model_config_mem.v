@@ -2,6 +2,8 @@
 /* ----------------------- Author: Mingxuan (Siris) Li ---------------------- */
 /* -------------------------------------------------------------------------- */
 
+`timescale 1ns/1ns
+
 module model_config_mem
 (
     input clk_i,
@@ -34,7 +36,7 @@ module model_config_mem
 
     localparam  TRANSFORMER = 0, CNN = 1;
 
-    wire [1:0] mem_select;
+    wire [2:0] mem_select;
     assign mem_select = config_valid_i
                       ? config_addr_i[10:8]
                       : model_read_valid_i
@@ -199,32 +201,41 @@ module model_config_mem
         $dumpfile("build/model_config_mem_tb.vcd");
         $dumpvars(0, model_config_mem);
 
-        // load data to `model_params`
-        config_valid_i = 1;
-        
+        // model_params[0] = 3;
+        // model_params[1] = 9;
+        // model_params[2] = 100;
+        // model_params[3] = TRANSFORMER;
+        // model_params[4] = 32;
+        // model_params[5] = 10;
+        // model_params[6] = 4;
+        // model_params[7] = 32;
+        // model_params[8] = 12;
+        // model_params[9] = 768;
 
-        model_params[0] = 3;
-        model_params[1] = 9;
-        model_params[2] = 100;
-        model_params[3] = TRANSFORMER;
-        model_params[4] = 32;
-        model_params[5] = 10;
-        model_params[6] = 4;
-        model_params[7] = 32;
-        model_params[8] = 12;
-        model_params[9] = 768;
+        // for (integer i = 0; i < 32; i = i + 1)
+        // begin
+        //     model_params[i] = i;
+        //     forward_sparsity_table[i] = 70;
+        //     backward_sparsity_table[i] = 80;
+        // end
 
+        #10000
         for (integer i = 0; i < 32; i = i + 1)
         begin
-            model_params[i] = i;
-            forward_sparsity_table[i] = 70;
-            backward_sparsity_table[i] = 80;
+            ;
+            $display("model_params[%2d] = %2d", i, model_params[i]);
+            $display("forward_sparsity_table[%2d] = %2d", i, forward_sparsity_table[i]);
         end
 
-        #100
-        $display("forward_breakpoint = %d", forward_breakpoint);
+        // $display("model_params[30] = %2d", model_params[30]);
 
         #50 $finish;
+    end
+
+    initial
+    begin
+        ;
+        $monitor("config_data_i = %0h @ time %0d\nconfig_addr_i = %0h @ time %0d\nmem_select = %0h @ time %0d\naddr_select = %0h @ time %0d", config_data_i, $time, config_addr_i, $time, mem_select, $time, addr_select, $time);
     end
 `endif
 
