@@ -13,7 +13,7 @@ module intra_layer_block_scheduler_tb;
     initial
     begin
         $dumpfile("build/intra_layer_block_scheduler_tb.vcd");
-        $dumpvars(0, scheduler_tb);
+        $dumpvars(0, intra_layer_block_scheduler_tb);
     end
 
     initial

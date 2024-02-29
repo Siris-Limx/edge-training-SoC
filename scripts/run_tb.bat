@@ -1,3 +1,4 @@
-iverilog  -o build/model_config_mem_tb rtl/src/model_config_mem.v rtl/tb/model_config_mem_tb.v
-vvp build/model_config_mem_tb
-@REM gtkwave build/model_config_mem_tb.vcd
+iverilog  -o build/intra_layer_block_scheduler_tb rtl/src/intra_layer_block_scheduler.v rtl/tb/intra_layer_block_scheduler_tb.v
+vvp build/intra_layer_block_scheduler_tb > build/intra_layer_block_scheduler_tb.log
+vvp build/intra_layer_block_scheduler_tb
+gtkwave build/intra_layer_block_scheduler_tb.vcd
