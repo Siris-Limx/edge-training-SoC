@@ -10,15 +10,18 @@ module model_config_mem
 (
     input           clk_i,
 
+    // config mem
     input [31:0]    config_data_i,
     input [31:0]    config_addr_i,
     input           config_valid_i,
     output reg      config_ready_o,
 
+    // read mem
     input  [31:0]   model_addr_i,
     output [31:0]   model_data_o,
     input           model_read_valid_i,
 
+    // wire out mem information
     output [31:0]   forward_length_o,
     output [31:0]   backward_length_o,
     output [31:0]   forward_breakpoint_o,

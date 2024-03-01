@@ -45,6 +45,15 @@
 `define TRANSFORMER 0
 `define CNN         1
 
+
+/* ----------------------- inter_layer_block_scheduler ---------------------- */
+
+// state machine
+`define IDLE        2'b00
+`define LOAD        2'b01
+`define COMPARE     2'b10
+`define SCHEDULE    2'b11
+
 // enable simulation
 `define SIMULATION
 

@@ -9,6 +9,7 @@ module intra_layer_block_scheduler
     input               clk_i,
     input               rst_ni,
 
+    // mem information from model_config_mem
     input [31:0]        forward_length_i,
     input [31:0]        backward_length_i,
     input [31:0]        forward_breakpoint_i,
@@ -16,6 +17,7 @@ module intra_layer_block_scheduler
 
     input               block_finish_valid_i,
 
+    // intra-block schedule output to inter-block scheduler
     output reg [31:0]   block0_start_o,
     output reg [31:0]   block1_start_o,
     output reg [31:0]   block0_length_o,
@@ -23,10 +25,6 @@ module intra_layer_block_scheduler
     output reg [ 1:0]   block_type_o
 );
 
-    // localparam [1:0] FORWARD_FORWARD   = 2'b00,
-    //                  FORWARD_BACKWARD  = 2'b01,
-    //                  BACKWARD_FORWARD  = 2'b10,
-    //                  BACKWARD_BACKWARD = 2'b11;
 
     reg [1:0] state_d, state_q;
 
