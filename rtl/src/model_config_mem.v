@@ -20,8 +20,12 @@ module model_config_mem
     input  [31:0]   model_addr_i,
     output [31:0]   model_data_o,
     input           model_read_valid_i,
+    output          model_read_ready_o,
 
     // wire out mem information
+    output [31:0]   npu_capability_o,
+    output [31:0]   in_pipeline_cim_capability_o,
+    output [31:0]   bubble_threshold_o,
     output [31:0]   forward_length_o,
     output [31:0]   backward_length_o,
     output [31:0]   forward_breakpoint_o,
@@ -60,6 +64,7 @@ module model_config_mem
                         ? backward_compute_table[addr_select]
                         : 32'b0;
 
+    assign model_read_ready_o = model_read_valid_i;
 
     /* -------------------------------- write mem ------------------------------- */
     // only model_params, forward_sparsity_table, backward_sparsity_table can be written
@@ -100,6 +105,7 @@ module model_config_mem
     wire [31:0] in_pipeline_cim_capability,     // in-pipeline CIM computation capability
                 npu_capability,                 // NPU computation capability
                 memory_boundary,                // memory boundary
+                bubble_threshold,               // bubble threshold
                 model_type,                     // model type (transformer, CNN)
                 batch_size,                     // batch size
                 forward_length,                 // forward layer length
@@ -113,6 +119,7 @@ module model_config_mem
     assign in_pipeline_cim_capability    = model_params[`IN_PIPELINE_CAPABILITY];
     assign npu_capability                = model_params[`NPU_CAPABILITY];
     assign memory_boundary               = model_params[`MEMORY_BOUNDARY];
+    assign bubble_threshold              = model_params[`BUBBLE_THRESHOLD];
     assign model_type                    = model_params[`MODEL_TYPE];
     assign batch_size                    = model_params[`BATCH_SIZE];
     assign forward_length                = model_params[`FORWARD_LENGTH];
@@ -123,6 +130,9 @@ module model_config_mem
     assign forward_breakpoint            = model_params[`FORWARD_BREAKPOINT];
     assign backward_breakpoint           = model_params[`BACKWARD_BREAKPOINT];
 
+    assign in_pipeline_cim_capability    = in_pipeline_cim_capability;
+    assign npu_capability_o              = npu_capability;
+    assign bubble_threshold_o            = bubble_threshold;
     assign forward_length_o              = forward_length;
     assign backward_length_o             = backward_length;
     assign forward_breakpoint_o          = forward_breakpoint;
@@ -134,7 +144,7 @@ module model_config_mem
     begin
         // forward breakpoint = backward length
         // result in two layer blocks: [0, breakpoint-1] & [breakpoint, forward_length-1]
-        model_params[30] = backward_length;
+        model_params[`FORWARD_BREAKPOINT] = backward_length;
 
         // backward breakpoint = the first time overall memory usage exceeds memory boundary
         // TODO: implement backward breakpoint algorithm
@@ -205,7 +215,7 @@ module model_config_mem
                     // transformer backward compute algorithm:
                     // forward_compute * (100 + (100 - forward_sparsity) * (100 - backward_sparsity) / 100)
                     backward_compute_table[i] = transformer_compute_coefficient
-                    * (100 + (((100 - backward_sparsity_table[i]) * (100 - forward_sparsity_table[i])) / 100));
+                    * (100 + (((100 - backward_sparsity_table[i]) * (100 - forward_sparsity_table[i])) >> 7));
                 else if (model_type == `CNN)
                     // TODO: CNN backward compute algorithm
                     ;
@@ -217,7 +227,7 @@ module model_config_mem
                     // transformer backward compute algorithm:
                     // forward_compute * (100 - forward_sparsity) * (100 - backward_sparsity) / 100
                     backward_compute_table[i] = transformer_compute_coefficient
-                    * (((100 - backward_sparsity_table[i]) * (100 - forward_sparsity_table[i])) / 100);
+                    * (((100 - backward_sparsity_table[i]) * (100 - forward_sparsity_table[i])) >> 7);
                 else if (model_type == `CNN)
                     // TODO: CNN backward compute algorithm
                     ;

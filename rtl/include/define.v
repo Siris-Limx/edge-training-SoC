@@ -31,13 +31,14 @@
 `define IN_PIPELINE_CAPABILITY  0
 `define NPU_CAPABILITY          1
 `define MEMORY_BOUNDARY         2
-`define MODEL_TYPE              3
-`define BATCH_SIZE              4
-`define FORWARD_LENGTH          5
-`define BACKWARD_LENGTH         6
-`define TRANSFORMER_SEQ_LENGTH  7
-`define TRANSFORMER_ATTEN_HEAD  8
-`define TRANSDORMER_HIDDEN_DIM  9
+`define BUBBLE_THRESHOLD        3
+`define MODEL_TYPE              4
+`define BATCH_SIZE              5
+`define FORWARD_LENGTH          6
+`define BACKWARD_LENGTH         7
+`define TRANSFORMER_SEQ_LENGTH  8
+`define TRANSFORMER_ATTEN_HEAD  9
+`define TRANSDORMER_HIDDEN_DIM  10
 `define FORWARD_BREAKPOINT      30
 `define BACKWARD_BREAKPOINT     31
 
@@ -53,6 +54,16 @@
 `define LOAD        2'b01
 `define COMPARE     2'b10
 `define SCHEDULE    2'b11
+
+// compute buffer index
+`define BLOCK0_CIM  2'b00
+`define BLOCK1_CIM  2'b01
+`define BLOCK0_NPU  2'b10
+`define BLOCK1_NPU  2'b11
+
+// schedule type
+`define BLOCK0_CIM_BLOCK1_NPU   1'b0
+`define BLOCK0_NPU_BLOCK1_CIM   1'b1
 
 // enable simulation
 `define SIMULATION
