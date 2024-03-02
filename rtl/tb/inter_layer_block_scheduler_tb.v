@@ -4,6 +4,7 @@ module inter_layer_block_scheduler_tb;
 
     reg clk, rst_n, schedule_valid;
     reg [31:0] npu_capability, in_pipeline_cim_capability;
+    reg [31:0] bubble_threshold;
     reg [31:0] config_mem_read_data;
     reg config_mem_read_ready;
     reg [1:0] block_type;
@@ -78,6 +79,14 @@ module inter_layer_block_scheduler_tb;
         end
     endtask
 
+    task compare;
+
+
+        begin
+            
+        end
+    endtask
+
     always #5 clk = ~clk;
 
     inter_layer_block_scheduler dut
@@ -87,6 +96,7 @@ module inter_layer_block_scheduler_tb;
 
         .npu_capability_i (npu_capability),
         .in_pipeline_cim_capability_i (in_pipeline_cim_capability),
+        .bubble_threshold_i (bubble_threshold),
 
         .config_mem_addr_o (config_mem_addr),
         .config_mem_read_valid_o (config_mem_read_valid),
@@ -109,6 +119,7 @@ module inter_layer_block_scheduler_tb;
         rst_n = 0;
         npu_capability = 3;
         in_pipeline_cim_capability = 1;
+        bubble_threshold = 2000;
         block0_start = 0;
         block1_start = 0;
         block_type = 0;

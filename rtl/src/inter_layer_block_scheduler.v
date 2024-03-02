@@ -35,6 +35,7 @@ module inter_layer_block_scheduler (
     reg [1:0] block_type_q;
     reg [31:0] compute_buffer_d[0:3], compute_buffer_q[0:3];    // normalized computation
     reg load_counter_d, load_counter_q;
+    reg [1:0] compare_counter_d, compare_counter_q;
     reg [31:0] block0_pointer_d, block0_pointer_q;
     reg [31:0] block1_pointer_d, block1_pointer_q;
     reg [31:0] block0_cim_block1_npu_d, block0_cim_block1_npu_q;
@@ -44,7 +45,7 @@ module inter_layer_block_scheduler (
     reg [1:0] state_d, state_q;
     reg schedule_finish;
 
-    assign schedule_ready_o = (state_q == `IDLE) && schedule_valid_i;
+    assign schedule_ready_o = (state_q == `SCHEDULE) && schedule_valid_i;
 
     // all the denpendency logic in `case` and `if` must be latched!
     always @(*)
@@ -55,6 +56,11 @@ module inter_layer_block_scheduler (
         block0_pointer_d = block0_pointer_q;
         block1_pointer_d = block1_pointer_q;
         load_counter_d = load_counter_q;
+        compare_counter_d = compare_counter_q;
+        block0_cim_block1_npu_d = block0_cim_block1_npu_q;
+        block0_npu_block1_cim_d = block0_npu_block1_cim_q;
+        schedule_type_d = schedule_type_q;
+        schedule_bubble_d = schedule_bubble_q;
         state_d = state_q;
         config_mem_read_valid_o = 1'b0;
         config_mem_addr_o = 32'b0;
@@ -131,26 +137,49 @@ module inter_layer_block_scheduler (
 
             `COMPARE:
             begin
-                block0_cim_block1_npu_d = (compute_buffer_q[`BLOCK0_CIM] > compute_buffer_q[`BLOCK1_NPU])
-                                        ? compute_buffer_q[`BLOCK0_CIM] : compute_buffer_q[`BLOCK1_NPU];
-                block0_npu_block1_cim_d = (compute_buffer_q[`BLOCK0_NPU] > compute_buffer_q[`BLOCK1_CIM])
-                                        ? compute_buffer_q[`BLOCK0_NPU] : compute_buffer_q[`BLOCK1_CIM];
+                case (compare_counter_q)
+                    2'b00:
+                    begin
+                        block0_cim_block1_npu_d = (compute_buffer_q[`BLOCK0_CIM] > compute_buffer_q[`BLOCK1_NPU])
+                                                ? compute_buffer_q[`BLOCK0_CIM] : compute_buffer_q[`BLOCK1_NPU];
+                        block0_npu_block1_cim_d = (compute_buffer_q[`BLOCK0_NPU] > compute_buffer_q[`BLOCK1_CIM])
+                                                ? compute_buffer_q[`BLOCK0_NPU] : compute_buffer_q[`BLOCK1_CIM];
+                        compare_counter_d = 2'b01;
+                    end
 
-                if (block0_cim_block1_npu_q > block0_npu_block1_cim_q)
-                begin
-                    schedule_type_d = `BLOCK0_NPU_BLOCK1_CIM;
-                    schedule_bubble_d = block0_cim_block1_npu_q - block0_npu_block1_cim_q;
-                end
-                else
-                begin
-                    schedule_type_d = `BLOCK0_CIM_BLOCK1_NPU;
-                    schedule_bubble_d = block0_npu_block1_cim_q - block0_cim_block1_npu_q;
-                end
+                    2'b01:
+                    begin
+                        if (block0_cim_block1_npu_q > block0_npu_block1_cim_q)
+                        begin
+                            schedule_type_d = `BLOCK0_NPU_BLOCK1_CIM;
+                            if (compute_buffer_q[`BLOCK0_NPU] > compute_buffer_q[`BLOCK1_CIM])
+                                schedule_bubble_d = compute_buffer_q[`BLOCK0_NPU] - compute_buffer_q[`BLOCK1_CIM];
+                            else
+                                schedule_bubble_d = compute_buffer_q[`BLOCK1_CIM] - compute_buffer_q[`BLOCK0_NPU];
+                        end
+                        else
+                        begin
+                            schedule_type_d = `BLOCK0_CIM_BLOCK1_NPU;
+                            if (compute_buffer_q[`BLOCK1_CIM] > compute_buffer_q[`BLOCK1_NPU])
+                                schedule_bubble_d = compute_buffer_q[`BLOCK1_CIM] - compute_buffer_q[`BLOCK1_NPU];
+                            else
+                                schedule_bubble_d = compute_buffer_q[`BLOCK1_NPU] - compute_buffer_q[`BLOCK0_CIM];
+                        end
+                        compare_counter_d = 2'b10;
+                    end
 
-                if (schedule_bubble_q > bubble_threshold_i)
-                    state_d = `SCHEDULE;
-                else
-                    state_d = `LOAD;
+                    2'b10:
+                    begin
+                        if (schedule_bubble_q > bubble_threshold_i)
+                            state_d = `LOAD;
+                        else
+                            state_d = `SCHEDULE;
+                        compare_counter_d = 2'b00;
+                    end
+
+                    default:
+                        compare_counter_d = 2'b00;
+                endcase
             end
 
             `SCHEDULE:
@@ -169,6 +198,7 @@ module inter_layer_block_scheduler (
             block0_pointer_q <= 0;
             block1_pointer_q <= 0;
             load_counter_q <= 1'b0;
+            compare_counter_q <= 2'b0;
             block_type_q <= 2'b0;
             schedule_valid_q <= 1'b0;
             config_mem_read_ready_q <= 1'b0;
@@ -188,10 +218,11 @@ module inter_layer_block_scheduler (
             block0_pointer_q <= block0_pointer_d;
             block1_pointer_q <= block1_pointer_d;
             load_counter_q <= load_counter_d;
+            compare_counter_q <= compare_counter_d;
             block0_cim_block1_npu_q <= block0_cim_block1_npu_d;
             block0_npu_block1_cim_q <= block0_npu_block1_cim_d;
             schedule_bubble_q <= schedule_bubble_d;
-            schedule_type_q <= schedule_bubble_d;
+            schedule_type_q <= schedule_type_d;
 
             // latch input
             block_type_q <= block_type_i;
@@ -216,6 +247,11 @@ module inter_layer_block_scheduler (
         $display("block0_pointer_q = %0d", block0_pointer_q);
         $display("block1_pointer_q = %0d", block1_pointer_q);
         $display("state_q = %0d", state_q);
+        $display("block0_cim_block1_npu_q = %0d", block0_cim_block1_npu_q);
+        $display("block0_npu_block1_cim_q = %0d", block0_npu_block1_cim_q);
+        $display("schedule_type_q = %0d", schedule_type_q);
+        $display("schedule_bubble_q = %0d", schedule_bubble_q);
+        $display("bubble_threshold = %0d", bubble_threshold_i);
 
         #50
         $finish;
