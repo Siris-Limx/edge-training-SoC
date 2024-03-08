@@ -2,8 +2,6 @@
 /* ----------------------- Author: Mingxuan (Siris) Li ---------------------- */
 /* -------------------------------------------------------------------------- */
 
-`timescale 1ns/1ns
-
 `include "rtl/include/define.v"
 
 module model_config_mem
@@ -148,6 +146,7 @@ module model_config_mem
 
         // backward breakpoint = the first time overall memory usage exceeds memory boundary
         // TODO: implement backward breakpoint algorithm
+        model_params[`BACKWARD_BREAKPOINT] = (2 * forward_length - backward_length) >> 1;
     end
 
     /* ---------------------- infer intermediate activation --------------------- */

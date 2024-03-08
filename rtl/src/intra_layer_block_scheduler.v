@@ -34,38 +34,38 @@ module intra_layer_block_scheduler
         case (state_q)
             `FORWARD_FORWARD:
             begin
-                block_type_o = `FORWARD_FORWARD;
-                block0_start_o = forward_breakpoint_i;
-                block0_length_o = forward_length_i - forward_breakpoint_i;
-                block1_start_o = 0;
-                block1_length_o = forward_length_i - forward_breakpoint_i;
+                block_type_o     = `FORWARD_FORWARD;
+                block0_start_o   = forward_breakpoint_i;
+                block0_length_o  = forward_length_i - forward_breakpoint_i;
+                block1_start_o   = 0;
+                block1_length_o  = forward_length_i - forward_breakpoint_i;
             end
 
             `FORWARD_BACKWARD:
             begin
-                block_type_o = `FORWARD_BACKWARD;
-                block0_start_o = 0;
-                block0_length_o = forward_breakpoint_i;
-                block1_start_o = backward_length_i - backward_breakpoint_i;
-                block1_length_o = backward_breakpoint_i;
+                block_type_o     = `FORWARD_BACKWARD;
+                block0_start_o   = 0;
+                block0_length_o  = forward_breakpoint_i;
+                block1_start_o   = backward_length_i - backward_breakpoint_i;
+                block1_length_o  = backward_breakpoint_i;
             end
 
             `BACKWARD_FORWARD:
             begin
-                block_type_o = `BACKWARD_FORWARD;
-                block0_start_o = 0;
-                block0_length_o = backward_breakpoint_i;
-                block1_start_o = forward_length_i - forward_breakpoint_i;
-                block1_length_o = forward_breakpoint_i;
+                block_type_o     = `BACKWARD_FORWARD;
+                block0_start_o   = 0;
+                block0_length_o  = backward_breakpoint_i;
+                block1_start_o   = forward_length_i - forward_breakpoint_i;
+                block1_length_o  = forward_breakpoint_i;
             end
 
             `BACKWARD_BACKWARD:
             begin
-                block_type_o = `BACKWARD_BACKWARD;
-                block0_start_o = backward_breakpoint_i;
-                block0_length_o = backward_length_i - backward_breakpoint_i;
-                block1_start_o = 0;
-                block1_length_o = backward_length_i - backward_breakpoint_i;
+                block_type_o     = `BACKWARD_BACKWARD;
+                block0_start_o   = backward_breakpoint_i;
+                block0_length_o  = backward_length_i - backward_breakpoint_i;
+                block1_start_o   = 0;
+                block1_length_o  = backward_length_i - backward_breakpoint_i;
             end
         endcase
     end
@@ -76,10 +76,10 @@ module intra_layer_block_scheduler
         state_d = state_q;
 
         case (state_q)
-            `FORWARD_FORWARD: state_d = block_finish_valid_i ? `BACKWARD_FORWARD : state_q;
-            `BACKWARD_FORWARD: state_d = block_finish_valid_i ? `BACKWARD_BACKWARD : state_q;
-            `BACKWARD_BACKWARD: state_d = block_finish_valid_i ? `FORWARD_BACKWARD : state_q;
-            `FORWARD_BACKWARD: state_d = block_finish_valid_i ? `FORWARD_FORWARD : state_q;
+            `FORWARD_FORWARD:   state_d = block_finish_valid_i ? `BACKWARD_FORWARD  : state_q;
+            `BACKWARD_FORWARD:  state_d = block_finish_valid_i ? `BACKWARD_BACKWARD : state_q;
+            `BACKWARD_BACKWARD: state_d = block_finish_valid_i ? `FORWARD_BACKWARD  : state_q;
+            `FORWARD_BACKWARD:  state_d = block_finish_valid_i ? `FORWARD_FORWARD   : state_q;
         endcase
     end
 

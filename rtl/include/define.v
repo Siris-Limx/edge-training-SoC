@@ -39,6 +39,7 @@
 `define TRANSFORMER_SEQ_LENGTH  8
 `define TRANSFORMER_ATTEN_HEAD  9
 `define TRANSDORMER_HIDDEN_DIM  10
+`define CNN_
 `define FORWARD_BREAKPOINT      30
 `define BACKWARD_BREAKPOINT     31
 
@@ -50,10 +51,12 @@
 /* ----------------------- inter_layer_block_scheduler ---------------------- */
 
 // state machine
-`define IDLE        2'b00
-`define LOAD        2'b01
-`define COMPARE     2'b10
-`define SCHEDULE    2'b11
+`define IDLE        3'b000
+`define LOAD        3'b001
+`define COMPARE     3'b010
+`define FUSE        3'b011
+`define SHARE       3'b100
+`define SCHEDULE    3'b101
 
 // compute buffer index
 `define BLOCK0_CIM  2'b00
@@ -64,6 +67,10 @@
 // schedule type
 `define BLOCK0_CIM_BLOCK1_NPU   1'b0
 `define BLOCK0_NPU_BLOCK1_CIM   1'b1
+
+// compute less flag
+`define BLOCK0_LESS 1'b0
+`define BLOCK1_LESS 1'b1
 
 // enable simulation
 `define SIMULATION

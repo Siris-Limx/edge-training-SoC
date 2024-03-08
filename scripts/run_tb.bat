@@ -1,4 +1,4 @@
-iverilog  -o build/intra_layer_block_scheduler_tb rtl/src/intra_layer_block_scheduler.v rtl/tb/intra_layer_block_scheduler_tb.v
-vvp build/intra_layer_block_scheduler_tb > build/intra_layer_block_scheduler_tb.log
-vvp build/intra_layer_block_scheduler_tb
-gtkwave build/intra_layer_block_scheduler_tb.vcd
+iverilog  -o build/inter_layer_block_scheduler_tb rtl/src/inter_layer_block_scheduler.v rtl/tb/inter_layer_block_scheduler_tb.v
+vvp build/inter_layer_block_scheduler_tb > build/inter_layer_block_scheduler_tb.log
+vvp build/inter_layer_block_scheduler_tb
+@REM gtkwave build/inter_layer_block_scheduler_tb.vcd
